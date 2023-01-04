@@ -1,4 +1,4 @@
-use std::{collections::BinaryHeap, cmp::Reverse};
+use std::{collections::BinaryHeap};
 
 
 /// BoxDim (length l, width w, height h)
@@ -21,7 +21,24 @@ fn wrapping_paper_in_sq_feet (bd: BoxDim) -> u32 {
     2 * (d1 + d2 + d3) + slack_paper
 }
 
+fn read_box_dims (input: &str) {
+    let dims = input.split('\n').collect::<Vec<&str>>();
+    let mut dbs: Vec<BoxDim>  = Vec::new();
+
+    for d in dims {
+        let v: Vec<u32>  = d.split('x').map(|s| s.parse::<u32>()).collect();
+        println!("v: {v[0]}");
+        //dbs.push(BoxDim(v[0], v[1], v[2]));
+    }
+
+    for x in dbs {
+        println!("{:?}", x);
+    }
+}
+
 fn main() {
+    let puzzle_input = std::fs::read_to_string("assets/puzzle-input.txt").expect("Should contain the puzzle input.");
+    read_box_dims(&puzzle_input);    
 }
 
 #[cfg(test)]
