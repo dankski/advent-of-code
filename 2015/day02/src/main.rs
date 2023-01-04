@@ -21,24 +21,32 @@ fn wrapping_paper_in_sq_feet (bd: BoxDim) -> u32 {
     2 * (d1 + d2 + d3) + slack_paper
 }
 
-fn read_box_dims (input: &str) {
+fn read_box_dims (input: &str) -> u32 {
     let dims = input.split('\n').collect::<Vec<&str>>();
     let mut dbs: Vec<BoxDim>  = Vec::new();
 
-    for d in dims {
-        let v: Vec<u32>  = d.split('x').map(|s| s.parse::<u32>()).collect();
-        println!("v: {v[0]}");
-        //dbs.push(BoxDim(v[0], v[1], v[2]));
+    for (_i, d) in dims.iter().enumerate() {
+
+        let ns: Vec<&str>  = d.split('x').collect();
+
+        if ns.len() == 3 {
+            let n: Vec<u32> = ns.into_iter().map(|n| n.parse::<u32>().unwrap()).collect();
+            dbs.push(BoxDim(n[0], n[1],n [2]));
+        }
     }
 
-    for x in dbs {
-        println!("{:?}", x);
+    let mut total_order = 0;
+
+    for b in dbs {
+        total_order = total_order + wrapping_paper_in_sq_feet(b);
     }
+
+    total_order
 }
 
 fn main() {
     let puzzle_input = std::fs::read_to_string("assets/puzzle-input.txt").expect("Should contain the puzzle input.");
-    read_box_dims(&puzzle_input);    
+    println!("Total order: {}", read_box_dims(&puzzle_input));    
 }
 
 #[cfg(test)]
