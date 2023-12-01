@@ -1,29 +1,74 @@
+
+
 pub fn calibration_value(line: &str) -> String {
 
     let first_left = first_value_from_left(line);
     let first_right = first_value_from_right(line);
 
-    println!("{first_left} {first_right}");
-
-    "".to_string()
+    format!("{first_left}{first_right}")
 }
 
 fn first_value_from_left(line: &str) -> String {
+
+    let mut value = String::from("");
+
     for c in line.chars() {
         if c.is_digit(10) {
             return c.to_string();
         }
+
+        value.push(c);
+
+        match convert_written_number(&value) {
+            Some(v) => return v,
+            _ => ()
+        }
     }
+
     return "".to_string();
 }
 
 fn first_value_from_right(line: &str) -> String {
+
+    let mut value = String::from("");
+
     for c in line.chars().rev() {
         if c.is_digit(10) {
             return c.to_string();
         }
+
+        value.insert_str(0, &c.to_string());
+        
+        match convert_written_number(&value) {
+            Some(v) => return v,
+            _ => ()
+        }
     }
-    return "".to_string();
+
+    return String::from("");
+}
+
+fn convert_written_number(value: &str) -> Option<String>{
+    let numbers = Vec::from([
+        ("one", "1"),
+        ("two", "2"),
+        ("three", "3"),
+        ("four", "4"),
+        ("five", "5"),
+        ("six", "6"),
+        ("seven", "7"),
+        ("eight", "8"),
+        ("nine", "9")
+    ]);
+
+    for (k,v) in numbers {
+        if value.to_string().contains(k) {
+            // println!("Contains {value} <- {k}");
+            return Some(v.to_string());
+        }
+    }
+
+    return None;
 }
 
 #[cfg(test)]
