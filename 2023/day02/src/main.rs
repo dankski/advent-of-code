@@ -9,9 +9,11 @@ fn main() {
     let games = puzzle_input.split('\n').collect::<Vec<&str>>();
 
     let mut sum = 0;
+    let mut sum_min_cubes = 0;
     for round in games {
         sum = sum + game.possible_game(&round.to_string());
+        sum_min_cubes = sum_min_cubes + game.min_cubes_per_game(&round.to_string()).1;
     }
 
-    println!("\n[SOLUTION] {sum}\n");
+    println!("\n[SOLUTION] part1: {sum} part2: {sum_min_cubes}\n");
 }
