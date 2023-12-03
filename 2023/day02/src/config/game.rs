@@ -1,4 +1,3 @@
-use std::collections::HashMap;
 
 #[derive(Copy, Clone)]
 pub struct Game {
@@ -18,18 +17,18 @@ impl Game {
         Game{load: BagLoading{red: 12, blue: 14, green: 13}}
     }
 
-    pub fn possible_game(self, g: &String) -> u32 {
+    pub fn possible_game(self, g: &String) -> (u32, u32) {
         let values: Vec<&str> = g.split(|c| c == ':' || c == ';').collect();
         
         let gid = self.extract_game_id(values[0]);
         for i in 1..values.len() {
             let r = values[i];
             if self.valdiate_round(r) != true {
-                return 0;
+                return (0, 0);
             }
         }
 
-        return gid;
+        return (gid, 0);
     }
 
     fn extract_game_id(self, s: &str) -> u32 {
@@ -66,7 +65,6 @@ impl Game {
             }
         }
 
-        println!("{red} {blue} {green}");
 
         return true;
     }
@@ -77,6 +75,11 @@ impl Game {
             return true;
         }
         return false;
+    }
+
+    fn minimum_cube_set(self) -> (u32, u32, u32) {
+
+        return (0,0,0);
     }
     
 }
@@ -89,22 +92,22 @@ mod tests {
     #[test]
     fn should_return_game1_ok() {
         let g = Game::new();
-
-        assert_eq!(g.possible_game(&"Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green".to_string()), 1);
+        
+        assert_eq!(g.possible_game(&"Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green".to_string()), (1, 0));
     }
 
     #[test]
     fn should_return_game2_ok() {
         let g = Game::new();
 
-        assert_eq!(g.possible_game(&"Game 2: 1 blue, 2 green; 3 green, 4 blue, 1 red; 1 green, 1 blue".to_string()), 2);
+        assert_eq!(g.possible_game(&"Game 2: 1 blue, 2 green; 3 green, 4 blue, 1 red; 1 green, 1 blue".to_string()), (2, 0));
     }
 
     #[test]
     fn should_return_game3_not_ok() {
         let g = Game::new();
 
-        assert_eq!(g.possible_game(&"Game 3: 8 green, 6 blue, 20 red; 5 blue, 4 red, 13 green; 5 green, 1 red".to_string()), 0);
+        assert_eq!(g.possible_game(&"Game 3: 8 green, 6 blue, 20 red; 5 blue, 4 red, 13 green; 5 green, 1 red".to_string()), (0, 0));
     }
 
 
@@ -112,14 +115,14 @@ mod tests {
     fn should_return_game4_not_ok() {
         let g = Game::new();
 
-        assert_eq!(g.possible_game(&"Game 4: 1 green, 3 red, 6 blue; 3 green, 6 red; 3 green, 15 blue, 14 red".to_string()), 0);
+        assert_eq!(g.possible_game(&"Game 4: 1 green, 3 red, 6 blue; 3 green, 6 red; 3 green, 15 blue, 14 red".to_string()), (0, 0));
     }
 
     #[test]
     fn should_return_game5_ok() {
         let g = Game::new();
 
-        assert_eq!(g.possible_game(&"Game 5: 6 red, 1 blue, 3 green; 2 blue, 1 red, 2 green".to_string()), 5);
+        assert_eq!(g.possible_game(&"Game 5: 6 red, 1 blue, 3 green; 2 blue, 1 red, 2 green".to_string()), (5, 0));
     }
 
 }
