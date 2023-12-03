@@ -1,5 +1,3 @@
-use core::num;
-use std::{ptr::null, sync::Arc};
 
 
 struct Parts {
@@ -15,15 +13,14 @@ struct Number {
 }
 
 impl Parts {
+
     fn init(&mut self) {
         self.x_dim = self.map[0].len() as i32;
         self.y_dim = self.map.len() as i32;
     }
 
-    fn possible_positions(self, pos: u32) -> Vec<(u32,u32)> {
-        return Vec::new();
-    }
 }
+
 pub fn parts_sum(schema: &String) -> u32 {
     
     let parts = load_parts_map(schema);
@@ -41,26 +38,38 @@ pub fn parts_sum(schema: &String) -> u32 {
 fn filter_numbers(numbers: &Vec<Number>, parts: &Parts) -> Vec<Number> {
     let mut found = Vec::new();
 
+    // (y,x)
+    let north: (i32, i32) = (-1, 0);
+    let south: (i32, i32) = (1, 0);
+    let west: (i32, i32) = (0, -1);
+    let east: (i32, i32) = (0, 1);
+
+    let north_west: (i32, i32) = (-1, -1);
+    let north_east: (i32, i32) = (-1, 1);
+    let south_west: (i32, i32) = (1, -1);
+    let south_east: (i32, i32) = (1, 1);
+
     for number in numbers {
         for x in number.x as i32 .. (number.x + number.val.len() as i32) {
-            let north: (u32, u32) = if number.y > 0 { ((number.y - 1) as u32, x as u32)} else{(0 as u32, 0 as u32)};
-            let south: (u32, u32) = if number.y < parts.y_dim - 1 { ((number.y + 1) as u32, x as u32)} else {(0 as u32, 0 as u32)};
-            let west: (u32, u32) = if x > 0 { (number.y as u32, (x - 1) as u32)} else {(0 as u32, 0 as u32)};
-            let east: (u32, u32) = if x < parts.x_dim - 1 { (number.y as u32, (x + 1) as u32) } else {(0 as u32, 0 as u32)};
+            let current_pos = (number.y, x);
+            let n_pos = add_pos(current_pos, north, &parts);
+            let s_pos = add_pos(current_pos, south, &parts);
+            let w_pos = add_pos(current_pos, west, &parts);
+            let e_pos = add_pos(current_pos, east, &parts);
 
-            let north_west: (u32, u32) = if number.y > 0 && x > 0 { ((number.y - 1) as u32, (x - 1) as u32)} else{(0 as u32, 0 as u32)};
-            let north_east: (u32, u32) = if number.y > 0 && x < parts.x_dim - 1 { ((number.y - 1) as u32, (x + 1) as u32)} else{(0 as u32, 0 as u32)};
-            let south_west: (u32, u32) = if number.y < parts.y_dim - 1 && x > 0 {((number.y + 1) as u32, (x - 1) as u32)} else{(0 as u32, 0 as u32)};
-            let south_east: (u32, u32) = if number.y < parts.y_dim - 1 && x < parts.x_dim - 1 {((number.y + 1) as u32, (x + 1) as u32)} else{(0 as u32, 0 as u32)};
+            let nw_pos = add_pos(current_pos, north_west, &parts);
+            let ne_pos = add_pos(current_pos, north_east, &parts);
+            let sw_pos = add_pos(current_pos, south_west, &parts);
+            let se_pos = add_pos(current_pos, south_east, &parts);
 
-            if has_adjacent(north, parts) 
-                || has_adjacent(south, parts) 
-                || has_adjacent(west, parts) 
-                || has_adjacent(east, parts) 
-                || has_adjacent(north_west, parts) 
-                || has_adjacent(north_east, parts) 
-                || has_adjacent(south_west, parts) 
-                || has_adjacent(south_east, parts) {
+            if has_adjacent(n_pos, parts) 
+                || has_adjacent(s_pos, parts) 
+                || has_adjacent(w_pos, parts) 
+                || has_adjacent(e_pos, parts) 
+                || has_adjacent(nw_pos, parts) 
+                || has_adjacent(ne_pos, parts) 
+                || has_adjacent(sw_pos, parts) 
+                || has_adjacent(se_pos, parts) {
 
                 found.push(Number{val: String::from(&number.val), x: number.x, y: number.y});
                 break;
@@ -72,6 +81,18 @@ fn filter_numbers(numbers: &Vec<Number>, parts: &Parts) -> Vec<Number> {
     return found;
 }
 
+fn add_pos(a: (i32, i32), b: (i32, i32), parts: &Parts) -> (u32, u32) {
+    let mut pos =(a.0 + b.0, a.1 + b.1);
+    if pos.0 < 0 || pos.0 > parts.y_dim - 1 {
+        pos.0 = 0;
+    }
+
+    if pos.1 < 0 || pos.1 > parts.x_dim - 1 {
+        pos.1 = 0;
+    }
+
+    return (pos.0 as u32, pos.1 as u32);
+}
 fn has_adjacent(pos: (u32, u32), parts: &Parts) -> bool {
     let row = parts.map.get(pos.0 as usize).unwrap();
     let c = row.get(pos.1 as usize).unwrap();
