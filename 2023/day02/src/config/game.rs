@@ -36,9 +36,31 @@ impl Game {
     }
 
     fn valdiate_round(self, round: &str) -> bool {
-        let _colors: Vec<&str> = round.split(',').collect();
+
+        let colors: Vec<String> = round.split(',').map(|e| e.to_string()).collect();
+
+        let red = 0;
+        let green = 0;
+        let blue = 0;
+
+        // for color in colors {
+        //     println!("{}", color);
+        //     red: u32 = self.read_color_value(&"red", &color);       
+        //     green = self.read_color_value(&"green", &color);
+        //     let blue = self.read_color_value(&"blue", &color);
+    
+        //     println!("{red} {green} {blue}");  
+        // }
 
         return true;
+    }
+
+    fn read_color_value(self,color: &str, s: &String) -> u32 {
+        if s.contains(color) {
+            let result: Vec<&str> = s.trim().split(char::is_whitespace).collect();
+            return result[0].parse::<u32>().unwrap();
+        }
+        return 0;
     }
     
 }
