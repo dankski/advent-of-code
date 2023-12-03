@@ -16,6 +16,38 @@ impl Game {
         Game{load: BagLoading{red: 12, blue: 14, green: 13}}
     }
 
+    pub fn min_cubes_per_game(self, g: &String) -> (u32, u32) {
+        let values: Vec<&str> = g.split(|c| c == ':' || c == ';').collect();
+        
+        let gid = self.extract_game_id(values[0]);
+        let mut min_cubes: (u32, u32, u32) = (0,0,0);
+
+        for i in 1..values.len() {
+            let r = values[i];
+            
+        }
+
+        return (gid, min_cubes.0 * min_cubes.1 * min_cubes.2);
+    }
+
+    fn minimum_cube_set(self, min_cube_set: (u32, u32, u32), current_set: (u32, u32, u32)) -> (u32, u32, u32) {
+        let mut min_result: (u32, u32, u32) = min_cube_set;
+
+        if current_set.0 >= min_cube_set.0 {
+            min_result.0 = current_set.0;
+        }
+
+        if current_set.1 >= min_cube_set.1 {
+            min_result.1 = current_set.1;
+        }
+
+        if current_set.2 >= min_cube_set.2 {
+            min_result.2 = current_set.2;
+        }
+        
+        return min_result;
+    }
+
     pub fn possible_game(self, g: &String) -> u32 {
         let values: Vec<&str> = g.split(|c| c == ':' || c == ';').collect();
         
@@ -38,35 +70,42 @@ impl Game {
     fn valdiate_round(self, round: &str) -> bool {
         let colors: Vec<String> = round.split(',').map(|e| e.to_string()).collect();
  
-        let mut red = 0;
-        let mut green = 0;
-        let mut blue = 0;
+        let mut rgb: (u32, u32, u32) = (0,0,0);
 
         for color in colors {
+            let result_rgb = self.extract_colors(&color);
+            rgb = (rgb.0 + result_rgb.0, rgb.1 + result_rgb.1, rgb.2 + result_rgb.2);
 
-            if color.contains("red") {
-                let result: Vec<&str> = color.trim().split(char::is_whitespace).collect();
-                red = result[0].parse::<u32>().unwrap();
-            }
-
-            if color.contains("blue") {
-                let result: Vec<&str> = color.trim().split(char::is_whitespace).collect();
-                blue = result[0].parse::<u32>().unwrap();
-            }
-
-            if color.contains("green") {
-                let result: Vec<&str> = color.trim().split(char::is_whitespace).collect();
-                green = result[0].parse::<u32>().unwrap();
-            }
-
-            if !self.validate((red, green, blue)) {
+            if !self.validate(rgb) {
                 return false;
             }
         }
 
-        println!("rgb ({red} {green} {blue})");
+        println!("rgb ({} {} {})", rgb.0, rgb.1, rgb.2);
 
         return true;
+    }
+
+
+    fn extract_colors(self, color: &String) -> (u32, u32, u32) {
+        let mut rgb_result: (u32,u32,u32) = (0,0,0);
+
+        if color.contains("red") {
+            let result: Vec<&str> = color.trim().split(char::is_whitespace).collect();
+            rgb_result.0 = result[0].parse::<u32>().unwrap();
+        }
+
+        if color.contains("blue") {
+            let result: Vec<&str> = color.trim().split(char::is_whitespace).collect();
+            rgb_result.1 = result[0].parse::<u32>().unwrap();
+        }
+
+        if color.contains("green") {
+            let result: Vec<&str> = color.trim().split(char::is_whitespace).collect();
+            rgb_result.2 = result[0].parse::<u32>().unwrap();
+        }
+
+        return rgb_result;
     }
 
     fn validate(self, round: (u32, u32, u32)) -> bool {
