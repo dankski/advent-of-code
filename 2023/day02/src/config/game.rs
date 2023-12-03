@@ -24,10 +24,23 @@ impl Game {
 
         for i in 1..values.len() {
             let r = values[i];
-            
+            min_cubes = self.calculate_min_cube_set(r, min_cubes);
+        
         }
 
+        println!("min rgb ({},{},{})", min_cubes.0, min_cubes.1, min_cubes.2);
         return (gid, min_cubes.0 * min_cubes.1 * min_cubes.2);
+    }
+
+    fn calculate_min_cube_set(self, round: &str, min_set: (u32,u32,u32)) -> (u32, u32, u32) {
+        let colors: Vec<String> = round.split(',').map(|e| e.to_string()).collect();
+        let mut min_set_result = min_set;
+        for color in colors {
+            let result_rgb = self.extract_colors(&color);
+            min_set_result = self.minimum_cube_set(min_set_result, result_rgb);
+        }
+  
+        return min_set_result;
     }
 
     fn minimum_cube_set(self, min_cube_set: (u32, u32, u32), current_set: (u32, u32, u32)) -> (u32, u32, u32) {
@@ -95,12 +108,13 @@ impl Game {
             rgb_result.0 = result[0].parse::<u32>().unwrap();
         }
 
-        if color.contains("blue") {
+        
+        if color.contains("green") {
             let result: Vec<&str> = color.trim().split(char::is_whitespace).collect();
             rgb_result.1 = result[0].parse::<u32>().unwrap();
         }
 
-        if color.contains("green") {
+        if color.contains("blue") {
             let result: Vec<&str> = color.trim().split(char::is_whitespace).collect();
             rgb_result.2 = result[0].parse::<u32>().unwrap();
         }
@@ -159,4 +173,11 @@ mod tests {
         assert_eq!(g.possible_game(&"Game 5: 6 red, 1 blue, 3 green; 2 blue, 1 red, 2 green".to_string()), 5);
     }
 
+
+    #[test]
+    fn should_return_48_for_game_1() {
+        let g = Game::new();
+
+        assert_eq!(g.min_cubes_per_game(&"Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green".to_string()), (1, 48));
+    }
 }
