@@ -180,4 +180,33 @@ mod tests {
 
         assert_eq!(g.min_cubes_per_game(&"Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green".to_string()), (1, 48));
     }
+
+    #[test]
+    fn should_return_12_for_game_2() {
+        let g = Game::new();
+
+        assert_eq!(g.min_cubes_per_game(&"Game 2: 1 blue, 2 green; 3 green, 4 blue, 1 red; 1 green, 1 blue".to_string()), (2, 12));
+    }
+
+    #[test]
+    fn should_return_1560_for_game_3() {
+        let g = Game::new();
+
+        assert_eq!(g.min_cubes_per_game(&"Game 3: 8 green, 6 blue, 20 red; 5 blue, 4 red, 13 green; 5 green, 1 red".to_string()), (3, 1560));
+    }
+
+    #[test]
+    fn should_return_630_for_game_4() {
+        let g = Game::new();
+
+        assert_eq!(g.min_cubes_per_game(&"Game 4: 1 green, 3 red, 6 blue; 3 green, 6 red; 3 green, 15 blue, 14 red".to_string()), (4, 630));
+    }
+
+    #[test]
+    fn should_return_36_for_game_5() {
+        let g = Game::new();
+
+        assert_eq!(g.min_cubes_per_game(&"Game 5: 6 red, 1 blue, 3 green; 2 blue, 1 red, 2 green".to_string()), (5, 36));
+    }
+
 }
