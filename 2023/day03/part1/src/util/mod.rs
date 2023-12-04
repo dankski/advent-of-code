@@ -9,7 +9,8 @@ struct Parts {
 struct Number {
     pub val: String,
     pub x: i32,
-    pub y: i32
+    pub y: i32,
+    pub is_part: bool
 }
 
 impl Parts {
@@ -49,29 +50,34 @@ fn filter_numbers(numbers: &Vec<Number>, parts: &Parts) -> Vec<Number> {
     let south_west: (i32, i32) = (1, -1);
     let south_east: (i32, i32) = (1, 1);
 
+    let dim_yx: (i32, i32) = (parts.y_dim, parts.x_dim);
+
     for number in numbers {
-        for x in number.x as i32 .. (number.x + number.val.len() as i32) {
+
+        let start = number.x;
+        let end = number.x + number.val.len() as i32;
+        for x in (start..end) {
             let current_pos = (number.y, x);
-            let n_pos = add_pos(current_pos, north, &parts);
-            let s_pos = add_pos(current_pos, south, &parts);
-            let w_pos = add_pos(current_pos, west, &parts);
-            let e_pos = add_pos(current_pos, east, &parts);
+            let n_pos = add_pos(current_pos, north, dim_yx);
+            let s_pos = add_pos(current_pos, south, dim_yx);
+            let w_pos = add_pos(current_pos, west, dim_yx);
+            let e_pos = add_pos(current_pos, east, dim_yx);
 
-            let nw_pos = add_pos(current_pos, north_west, &parts);
-            let ne_pos = add_pos(current_pos, north_east, &parts);
-            let sw_pos = add_pos(current_pos, south_west, &parts);
-            let se_pos = add_pos(current_pos, south_east, &parts);
+            let nw_pos = add_pos(current_pos, north_west, dim_yx);
+            let ne_pos = add_pos(current_pos, north_east, dim_yx);
+            let sw_pos = add_pos(current_pos, south_west, dim_yx);
+            let se_pos = add_pos(current_pos, south_east, dim_yx);
+    
+            if has_adjacent(n_pos, &parts) 
+                || has_adjacent(s_pos,  &parts) 
+                || has_adjacent(w_pos,  &parts) 
+                || has_adjacent(e_pos,  &parts) 
+                || has_adjacent(nw_pos, &parts) 
+                || has_adjacent(ne_pos, &parts) 
+                || has_adjacent(sw_pos, &parts) 
+                || has_adjacent(se_pos, &parts) {
 
-            if has_adjacent(n_pos, parts) 
-                || has_adjacent(s_pos, parts) 
-                || has_adjacent(w_pos, parts) 
-                || has_adjacent(e_pos, parts) 
-                || has_adjacent(nw_pos, parts) 
-                || has_adjacent(ne_pos, parts) 
-                || has_adjacent(sw_pos, parts) 
-                || has_adjacent(se_pos, parts) {
-
-                found.push(Number{val: String::from(&number.val), x: number.x, y: number.y});
+                found.push(Number{val: String::from(&number.val), x: number.x, y: number.y, is_part: true});
                 break;
             }
   
@@ -81,32 +87,48 @@ fn filter_numbers(numbers: &Vec<Number>, parts: &Parts) -> Vec<Number> {
     return found;
 }
 
-fn add_pos(a: (i32, i32), b: (i32, i32), parts: &Parts) -> (u32, u32) {
-    let mut pos =(a.0 + b.0, a.1 + b.1);
-    if pos.0 < 0 || pos.0 > parts.y_dim - 1 {
-        pos.0 = 0;
+fn add_pos(a: (i32, i32), b: (i32, i32), dim_yx: (i32, i32)) -> (u32, u32) {
+    let pos =(a.0 + b.0, a.1 + b.1);
+
+    if pos.0 < 0 {
+        return (0, 0);
     }
 
-    if pos.1 < 0 || pos.1 > parts.x_dim - 1 {
-        pos.1 = 0;
+    if pos.0 > dim_yx.0 - 1 {
+        return (0, 0);
+    }
+
+    if pos.1 < 0 {
+        return (0, 0);
+    }
+
+    if pos.1 > dim_yx.1 - 1 {
+        return (0, 0);
     }
 
     return (pos.0 as u32, pos.1 as u32);
 }
+
 fn has_adjacent(pos: (u32, u32), parts: &Parts) -> bool {
     let row = parts.map.get(pos.0 as usize).unwrap();
     let c = row.get(pos.1 as usize).unwrap();
-    if *c != '.' && !c.is_alphanumeric() {
-        return true;
+
+    if *c == '.' {
+        return false;
     }
-    return false;
+
+    if c.is_digit(10) {
+        return false;
+    }
+
+    return true;
 }
 
 fn find_numbers(parts: &Parts) -> Vec<Number> {
     let mut numbers: Vec<Number> = Vec::new();
     let mut start_reading_num: bool = false;
     for (i, part) in parts.map.iter().enumerate() {
-        let mut number = Number{val: String::from(""), x:0, y:0};
+        let mut number = Number{val: String::from(""), x:0, y:0, is_part: false};
         for (j, c) in part.iter().enumerate() {
 
             if c.is_digit(10) {
@@ -123,7 +145,7 @@ fn find_numbers(parts: &Parts) -> Vec<Number> {
             else {
                 if start_reading_num == true {
                     start_reading_num = false;
-                    numbers.push(Number{val: number.val, x: number.x, y: number.y});
+                    numbers.push(Number{val: number.val, x: number.x, y: number.y, is_part: false});
                     number.val = String::from("");
                     number.x = 0;
                     number.y = 0;
@@ -136,10 +158,10 @@ fn find_numbers(parts: &Parts) -> Vec<Number> {
 
 fn load_parts_map(schema: &String) -> Parts {
     let mut parts = Parts{map: Vec::new(), x_dim: 0, y_dim: 0};
-    let lines: Vec<&str> = schema.split('\n').collect();
+    let lines: Vec<&str> = schema.trim().split('\n').collect();
     for line in lines {
         let mut v: Vec<char> = Vec::new();
-        for c in line.trim().chars() {
+        for c in line.chars() {
             v.push(c);
         }
         parts.map.push(v);
