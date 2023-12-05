@@ -11,7 +11,7 @@ impl Card {
     fn calculate_points(&mut self) {
 
         let mut count_winners = 0;
-        
+
         for v in &self.numbers {
             if self.winning.contains(&v) {
                 count_winners += 1;
@@ -49,11 +49,9 @@ fn init_cards(input: &String) -> Vec<Card> {
     for (index, line) in lines.iter().enumerate() {
         let card_line: Vec<&str> = line.split('|').collect();
         let card_winning: Vec<&str> = card_line[0].split(":").collect();
-        let own_numbers: Vec<&str> = card_line[1].trim().split(' ').filter(|&s| !s.is_empty()).clone().collect();
-
-        let winning_numbers: Vec<u32> = card_winning[1].trim().split(' ').map(|v| v.parse::<u32>().unwrap()).collect();
-        let own_numbers_numbers: Vec<u32> = own_numbers.iter().map(|v| v.parse::<u32>().unwrap()).collect();
-        let card = Card{id: (index + 1) as u32, winning: winning_numbers, numbers: own_numbers_numbers, points: 0};
+        let own_numbers: Vec<u32> = card_line[1].trim().split(' ').filter(|&s| !s.is_empty()).map(|v| v.parse::<u32>().unwrap()).collect();
+        let winning_numbers: Vec<u32> = card_winning[1].trim().split(' ').filter(|&s| !s.is_empty()).map(|v| v.parse::<u32>().unwrap()).collect();
+        let card = Card{id: (index + 1) as u32, winning: winning_numbers, numbers: own_numbers, points: 0};
         cards.push(card);
     }
 
@@ -72,10 +70,8 @@ mod tests {
     use super::*;
     use super::setup::*;
 
-    
-
     #[test]
-    fn should_read_x () {
+    fn should_calculate_winning () {
         assert_eq!(winning_total(&load_example()), 13);
     }
 
