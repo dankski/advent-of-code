@@ -6,10 +6,39 @@ struct Card {
     points: u32
 }
 
+impl Card {
+
+    fn calculate_points(&mut self) {
+
+        let mut count_winners = 0;
+        
+        for v in &self.numbers {
+            if self.winning.contains(&v) {
+                count_winners += 1;
+            }
+        }
+
+        if count_winners != 0 {
+            self.points = 2u32.pow(count_winners - 1);
+        }
+    }
+
+    pub fn points(mut self) -> u32 {
+        if self.points == 0 {
+            self.calculate_points();
+        }
+        return self.points;
+    }
+}
+
 
 pub fn winning_total(input: &String) -> u32 {
     let cards = init_cards(input);
-    return 0;
+    let mut sum = 0;
+    for c in cards {
+        sum += c.points();
+    }
+    return sum;
 }
 
 fn init_cards(input: &String) -> Vec<Card> {
