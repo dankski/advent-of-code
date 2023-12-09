@@ -1,5 +1,3 @@
-// mod gear_analyzer_01;
-mod gear_analyzer_02;
+mod gear_analyzer;
 
-// pub use gear_analyzer_01::parts_sum;
-pub use gear_analyzer_02::gears_sum;
+pub use gear_analyzer::gears_sum;
