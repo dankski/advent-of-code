@@ -3,8 +3,10 @@ use std::hash::{Hash, Hasher};
 use std::fs::File;
 use std::io::{BufReader, BufRead};
 use regex::Regex;
+use std::collections::HashSet;
 
-struct ValidPosition {
+#[derive(Debug, Eq, PartialEq, Hash)]
+struct Position {
     pub row: i32,
     pub col: i32,
 }
@@ -39,7 +41,7 @@ impl Hash for PartNumber {
 
 type Schema = Vec<Vec<char>>;
 
-pub fn gears_sum(reader: BufReader<File>) -> u32 {
+pub fn gears_sum(reader: BufReader<&File>) -> u32 {
 
     let mut schema: Schema = Vec::new();
 
@@ -53,6 +55,18 @@ pub fn gears_sum(reader: BufReader<File>) -> u32 {
     let values: Vec<u32> = valid_part_numbers.iter().map(|v| v.val).collect();
  
     return values.iter().sum::<u32>();
+}
+
+pub fn gears_ratio_sum(reader: BufReader<&File>) -> u32 {
+    let mut schema: Schema = Vec::new();
+
+    for line in reader.lines() {
+        schema.push(line.unwrap().chars().collect());
+    }
+
+    let numbers:Vec<PartNumber> = find_numbers(&schema);
+
+    return find_valid_gear_numbers(&numbers, &schema);
 }
 
 fn find_numbers(schema: &Schema) -> Vec<PartNumber> {
@@ -86,18 +100,62 @@ fn mark_valid_part_numbers(part_numbers: &Vec<PartNumber>, schema: &Schema) -> V
     return valid_part_number;
 }
 
+fn find_valid_gear_numbers(part_numbers: &Vec<PartNumber>, schema: &Schema) -> u32 {
+   let mut valid_gears:Vec<u32> = Vec::new();
+   let mut valid_numbers: Vec<PartNumber> = part_numbers.clone();
+
+   for (row_index, row) in schema.iter().enumerate() {
+        for (col_index, elem) in row.iter().enumerate() {
+            let mut valid_positions:HashSet<Position> = HashSet::new();
+            if is_valid_gear(*elem) {
+                valid_positions.insert(Position { row: row_index as i32 - 1, col: col_index as i32 - 1});
+                valid_positions.insert(Position { row: row_index as i32 - 1, col: col_index as i32});
+                valid_positions.insert(Position { row: row_index as i32 - 1, col: col_index as i32 + 1});
+                valid_positions.insert(Position { row: row_index as i32, col: col_index as i32 - 1});
+                valid_positions.insert(Position { row: row_index as i32, col: col_index as i32 + 1});
+                valid_positions.insert(Position { row: row_index as i32 + 1, col: col_index as i32 - 1});
+                valid_positions.insert(Position { row: row_index as i32 + 1, col: col_index as i32});
+                valid_positions.insert(Position { row: row_index as i32 + 1, col: col_index as i32 + 1});
+
+                let mut candidates: Vec<PartNumber> = Vec::new();
+                for part_number in &valid_numbers {
+                    if is_at_valid_location(part_number, &valid_positions) {
+                        candidates.push(part_number.clone());
+                    }
+                }
+                
+                if candidates.len() == 2 {
+                    valid_gears.push(candidates.iter().map(|p| p.val).reduce(|a, b| a * b).unwrap());
+                    // Subtract candidates
+                    valid_numbers.retain(|&part| !&candidates.contains(&part));
+                }
+            }
+        }
+   }
+
+   return valid_gears.iter().sum();
+
+}
+
+fn is_at_valid_location(part_number: &PartNumber, valid_positions: &HashSet<Position>) -> bool {
+    let mapped_part_numbers: HashSet<Position> = (part_number.start..part_number.end).into_iter().map(|i| Position{row: part_number.row, col: i}).collect();
+    let matches = mapped_part_numbers.intersection(valid_positions);
+
+    return matches.count() != 0;
+}
+
 fn is_valid_part_number(part_number: &PartNumber, schema: &Schema) -> bool {
  
-    let mut valid_positions:Vec<ValidPosition>= Vec::new();
+    let mut valid_positions:Vec<Position>= Vec::new();
     for col in part_number.start..part_number.end {
-        valid_positions.push(ValidPosition { row: part_number.row - 1, col: col - 1});
-        valid_positions.push(ValidPosition { row: part_number.row - 1, col: col});
-        valid_positions.push(ValidPosition { row: part_number.row - 1, col: col + 1});
-        valid_positions.push(ValidPosition { row: part_number.row, col: col - 1});
-        valid_positions.push(ValidPosition { row: part_number.row, col: col + 1});
-        valid_positions.push(ValidPosition { row: part_number.row + 1, col: col - 1});
-        valid_positions.push(ValidPosition { row: part_number.row + 1, col: col});
-        valid_positions.push(ValidPosition { row: part_number.row + 1, col: col + 1});
+        valid_positions.push(Position { row: part_number.row - 1, col: col - 1});
+        valid_positions.push(Position { row: part_number.row - 1, col: col});
+        valid_positions.push(Position { row: part_number.row - 1, col: col + 1});
+        valid_positions.push(Position { row: part_number.row, col: col - 1});
+        valid_positions.push(Position { row: part_number.row, col: col + 1});
+        valid_positions.push(Position { row: part_number.row + 1, col: col - 1});
+        valid_positions.push(Position { row: part_number.row + 1, col: col});
+        valid_positions.push(Position { row: part_number.row + 1, col: col + 1});
     }
     
     let mut match_postions: Vec<bool> = Vec::new();
@@ -120,6 +178,10 @@ fn is_valid_part_number_location_designator(c: char) -> bool {
     !c.is_digit(10) && c != '.'
 }
 
+fn is_valid_gear(c: char) -> bool {
+    c == '*'
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -127,7 +189,7 @@ mod tests {
     #[test]
     fn should_calculate_correct_sum() {
         let file = File::open("assets/test_input_00.txt").expect("Should contain the puzzle input.");
-        let reader = BufReader::new(file);
+        let reader = BufReader::new(&file);
 
         assert_eq!(gears_sum(reader), 4361);
     }
@@ -135,7 +197,7 @@ mod tests {
     #[test]
     fn should_calculate_small_sum_01() {
         let file = File::open("assets/test_input_01.txt").expect("Should contain the puzzle input.");
-        let reader = BufReader::new(file);
+        let reader = BufReader::new(&file);
 
         assert_eq!(gears_sum(reader), 1209);
     }
@@ -143,7 +205,7 @@ mod tests {
     #[test]
     fn should_calculate_small_sum_02() {
         let file = File::open("assets/test_input_02.txt").expect("Should contain the puzzle input.");
-        let reader = BufReader::new(file);
+        let reader = BufReader::new(&file);
 
         assert_eq!(gears_sum(reader), 675);
     }
@@ -151,12 +213,17 @@ mod tests {
     #[test]
     fn should_calculate_small_sum_03() {
         let file = File::open("assets/test_input_03.txt").expect("Should contain the puzzle input.");
-        let reader = BufReader::new(file);
+        let reader = BufReader::new(&file);
 
         assert_eq!(gears_sum(reader), 862);
     }
 
+    #[test]
+    fn should_calculate_gear_sum_00() {
+        let file = File::open("assets/test_input_00.txt").expect("Should contain the puzzle input.");
+        let reader = BufReader::new(&file);
 
-
+        assert_eq!(gears_ratio_sum(reader), 467835);
+    }
 
 }
