@@ -10,6 +10,7 @@ fn main() {
 
     let sum = util::gears_sum(reader);
 
+    let file = &File::open("assets/input.txt").expect("Should contain the puzzle input.");
     let reader = BufReader::new(file);
     let gear_ration_sum = util::gears_ratio_sum(reader);
 

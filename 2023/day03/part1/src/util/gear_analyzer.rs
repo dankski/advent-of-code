@@ -226,4 +226,20 @@ mod tests {
         assert_eq!(gears_ratio_sum(reader), 467835);
     }
 
+    #[test]
+    fn should_calculate_gear_sum_01() {
+        let file = File::open("assets/test_input_01.txt").expect("Should contain the puzzle input.");
+        let reader = BufReader::new(&file);
+
+        assert_eq!(gears_ratio_sum(reader), 0);
+    }
+
+    #[test]
+    fn should_calculate_gear_sum_02() {
+        let file = File::open("assets/test_input_02.txt").expect("Should contain the puzzle input.");
+        let reader = BufReader::new(&file);
+
+        assert_eq!(gears_ratio_sum(reader), 3538);
+    }
+
 }
