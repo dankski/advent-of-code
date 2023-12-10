@@ -102,7 +102,7 @@ fn mark_valid_part_numbers(part_numbers: &Vec<PartNumber>, schema: &Schema) -> V
 
 fn find_valid_gear_numbers(part_numbers: &Vec<PartNumber>, schema: &Schema) -> u32 {
    let mut valid_gears:Vec<u32> = Vec::new();
-   let mut valid_numbers: Vec<PartNumber> = part_numbers.clone();
+   let valid_numbers: Vec<PartNumber> = part_numbers.clone();
 
    for (row_index, row) in schema.iter().enumerate() {
         for (col_index, elem) in row.iter().enumerate() {
@@ -126,8 +126,6 @@ fn find_valid_gear_numbers(part_numbers: &Vec<PartNumber>, schema: &Schema) -> u
                 
                 if candidates.len() == 2 {
                     valid_gears.push(candidates.iter().map(|p| p.val).reduce(|a, b| a * b).unwrap());
-                    // Subtract candidates
-                    valid_numbers.retain(|&part| !&candidates.contains(&part));
                 }
             }
         }
