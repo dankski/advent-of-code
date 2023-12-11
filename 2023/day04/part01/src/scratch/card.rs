@@ -58,22 +58,18 @@ fn init_cards(input: &String) -> Vec<Card> {
     return cards;
 }
 
-mod setup {
-
-    pub fn load_example() -> String {
-        return std::fs::read_to_string("assets/example.txt").expect("Should read test input");
-    }
-}
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use super::setup::*;
+
+    pub fn load_example() -> String {
+        return std::fs::read_to_string("assets/example.txt").expect("Should read test input");
+    }
 
     #[test]
     fn should_calculate_winning () {
         assert_eq!(winning_total(&load_example()), 13);
     }
-
 
 }
