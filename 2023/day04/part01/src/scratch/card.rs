@@ -1,6 +1,6 @@
 #[derive(Debug, Clone)]
 struct Card {
-    id: u32,
+    _id: u32,
     winning: Vec<u32>,
     numbers: Vec<u32>,
     points: u32
@@ -57,7 +57,7 @@ fn init_cards(input: &String) -> Vec<Card> {
         let card_winning: Vec<&str> = card_line[0].split(":").collect();
         let own_numbers: Vec<u32> = card_line[1].trim().split(' ').filter(|&s| !s.is_empty()).map(|v| v.parse::<u32>().unwrap()).collect();
         let winning_numbers: Vec<u32> = card_winning[1].trim().split(' ').filter(|&s| !s.is_empty()).map(|v| v.parse::<u32>().unwrap()).collect();
-        let card = Card{id: (index + 1) as u32, winning: winning_numbers, numbers: own_numbers, points: 0};
+        let card = Card{_id: (index + 1) as u32, winning: winning_numbers, numbers: own_numbers, points: 0};
         cards.push(card);
     }
 
