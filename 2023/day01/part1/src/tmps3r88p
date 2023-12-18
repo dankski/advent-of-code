@@ -11,6 +11,6 @@ fn main() {
         sum = sum + v;
     }
 
-    
+    p
     println!("\n[SOLUTION] {sum}\n");
 }
