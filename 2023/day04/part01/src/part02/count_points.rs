@@ -14,13 +14,11 @@ pub fn calculate_total_scratch_cards(lines: Vec<&str>) -> u32 {
 
     let mut result = games.len();
 
-    let mut game_copies: Vec<Game> = games.iter().flat_map(|i| copies(i, games.clone())).collect();
-
-    println!("copies {}", game_copies.len());
+    let mut game_copies: Vec<Game> = games.iter().flat_map(|i| copies(i, &games)).collect();
 
     while !game_copies.is_empty() {
         result = result + game_copies.len();
-        game_copies = game_copies.iter_mut().flat_map(|game| copies(game, games.clone())).collect();
+        game_copies = game_copies.iter_mut().flat_map(|game| copies(game, &games)).collect();
     }
 
     return result as u32; 
@@ -40,7 +38,7 @@ fn parse_games(line: &str) -> Game {
     Game{game_number: game_number[0].clone().unwrap(), winning_numbers: winning_numbers.clone(), actual_numbers: actual_numbers.clone()}
 }
 
-fn copies(game: &Game, games: Vec<Game>) -> Vec<Game> {
+fn copies(game: &Game, games: &Vec<Game>) -> Vec<Game> {
     let hits = count_hits(game);
     if hits < 1 {
        return Vec::new();
