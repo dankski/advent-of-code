@@ -9,18 +9,23 @@ struct Card {
 impl Card {
 
     fn calculate_points(&mut self) {
-
-        let mut count_winners = 0;
-
-        for v in &self.numbers {
-            if self.winning.contains(&v) {
-                count_winners += 1;
-            }
-        }
+      let count_winners = self.winning_numbers();
 
         if count_winners != 0 {
             self.points = 2u32.pow(count_winners - 1);
         }
+    }
+
+    pub fn winning_numbers(&mut self) -> u32 {
+      let mut count_winners = 0;
+
+      for v in &self.numbers {
+        if self.winning.contains(&v) {
+            count_winners += 1;
+        }
+      }
+
+      count_winners
     }
 
     pub fn points(mut self) -> u32 {
@@ -40,6 +45,14 @@ pub fn winning_total(input: &String) -> u32 {
     }
     return sum;
 }
+
+pub fn scratch_card_total(input: &String) -> u32 {
+  let cards: Vec<Card> = init_cards(input);
+
+
+  return 0;
+}
+
 
 fn init_cards(input: &String) -> Vec<Card> {
 
@@ -71,5 +84,11 @@ mod tests {
     fn should_calculate_winning () {
         assert_eq!(winning_total(&load_example()), 13);
     }
+
+    #[test]
+    fn should_calculate_total_of_scratch_cards () {
+        assert_eq!(scratch_card_total(&load_example()), 30);
+    }
+
 
 }
