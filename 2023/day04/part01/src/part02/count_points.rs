@@ -70,6 +70,6 @@ mod tests {
         let input = std::fs::read_to_string("assets/input.txt").expect("Should read test input");
         let lines: Vec<&str> = input.trim().split('\n').collect();
 
-        assert_eq!(calculate_total_scratch_cards(lines), 30);
+        assert_eq!(calculate_total_scratch_cards(lines), 5923918);
     }
 }
