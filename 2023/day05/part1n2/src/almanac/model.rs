@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 #[derive(Debug, Clone)]
 pub struct Line {
   pub dst: u64,
@@ -37,27 +35,6 @@ impl CategoryMap {
     }
 
     return mapping;
-  }
-
-  pub fn generate_map(&self) -> HashMap<u64, u64> {
-    let mut map = HashMap::new();
-    
-
-    for line in &self.lines {
-      let start_src = line.src;
-      let end_src = line.src + line.range;
-      let start_dst = line.dst;
-      let end_dst = line.dst + line.range;
-      let keys: Vec<u64> = (start_src..end_src).collect();
-      let values: Vec<u64> = (start_dst..end_dst).collect();
-      let keys_values: Vec<(u64,u64)> = keys.into_iter().zip(values.into_iter()).collect();
-
-      for &(k,v) in &keys_values {
-        map.insert(k, v);
-      }
-    }
-    
-    map
   }
 
 }
