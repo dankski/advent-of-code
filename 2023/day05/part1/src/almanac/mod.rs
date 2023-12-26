@@ -147,7 +147,7 @@ fn propagate_seed(seed: u64, cat_map: &CategoryMap) -> u64 {
 }
 
 fn calculate_lowest_location_part_2(seeds: &Seeds, maps: &Vec<CategoryMap>) -> u64 {
-    let mut result = u64::MAX;
+
 
     let mut seed_range_start = seeds.values[0];
     let mut seed_range_end = seed_range_start + seeds.values[1];
@@ -156,11 +156,21 @@ fn calculate_lowest_location_part_2(seeds: &Seeds, maps: &Vec<CategoryMap>) -> u
 
     seed_range_start = seeds.values[2];
     seed_range_end = seed_range_start + seeds.values[3];
-    let _seed_range_two: Vec<u64> = (seed_range_start..seed_range_end).collect();
+    let seed_range_two: Vec<u64> = (seed_range_start..seed_range_end).collect();
 
     // let seed_range: Vec<u64> = seed_range_one.iter().zip(seed_range_two).collect();
+    let mut result = u64::MAX;
 
     seed_range_one.iter().for_each(|seed| {
+        let mut final_seed = *seed;
+
+        maps.iter()
+            .for_each(|m| final_seed = propagate_seed(final_seed, &m));
+
+        result = result.min(final_seed);
+    });
+
+    seed_range_two.iter().for_each(|seed| {
         let mut final_seed = *seed;
 
         maps.iter()
@@ -194,13 +204,20 @@ mod tests {
         assert_eq!(lowest_location(&mini_almanac), 35);
     }
 
-
     #[test]
     fn should_return_lowest_location_part_02() {
         let mini_almanac =
+            std::fs::read_to_string("assets/input.txt").expect("This file should exist");
+
+        assert_eq!(lowest_location_part_2(&mini_almanac), 46);
+    }
+
+    #[test]
+    fn should_return_lowest_location_example_part_02() {
+        let mini_almanac =
             std::fs::read_to_string("assets/example.txt").expect("This file should exist");
 
-        assert_eq!(lowest_location_part_2(&mini_almanac), 35);
+        assert_eq!(lowest_location_part_2(&mini_almanac), 46);
     }
 
     #[test]
