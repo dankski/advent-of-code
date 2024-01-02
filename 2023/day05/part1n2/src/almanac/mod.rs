@@ -38,7 +38,33 @@ pub fn lowest_location(almanac: &String) -> u64 {
         hum_to_loc,
     ];
 
-    return calculate_lowest_location(&seeds, &maps);
+    return calculate_lowest_location(&seeds.values, &maps);
+}
+
+pub fn lowest_location_part_2(almanac: &String) -> u64 {
+    let almanac = load_almanac(almanac);
+
+    let seeds = parse_seeds(&almanac.lines[0]);
+
+    let seed_to_soil = parse_cat_map(&almanac, "seed-to-soil");
+    let soil_to_fertilzer = parse_cat_map(&almanac, "soil-to-fertilizer");
+    let fertilzer_to_water = parse_cat_map(&almanac, "fertilizer-to-water");
+    let water_to_light = parse_cat_map(&almanac, "water-to-light");
+    let light_to_temp = parse_cat_map(&almanac, "light-to-temperature");
+    let temp_to_hum = parse_cat_map(&almanac, "temperature-to-humidity");
+    let hum_to_loc = parse_cat_map(&almanac, "humidity-to-location");
+
+    let maps = vec![
+        seed_to_soil,
+        soil_to_fertilzer,
+        fertilzer_to_water,
+        water_to_light,
+        light_to_temp,
+        temp_to_hum,
+        hum_to_loc,
+    ];
+
+    return calculate_lowest_location_part_2(&seeds.values, &maps);
 }
 
 fn load_almanac(almanac: &String) -> Almanac {
@@ -96,13 +122,25 @@ fn parse_cat_map(almanac: &Almanac, map_name: &str) -> CategoryMap {
     }
 }
 
-fn calculate_lowest_location(seeds: &Seeds, maps: &Vec<CategoryMap>) -> u64 {
+fn calculate_lowest_location_part_2(seeds: &Vec<u64>, maps: &Vec<CategoryMap>) -> u64 {
+    let seed_pairs: Vec<Vec<u64>> = seeds.chunks(2).map(|chunk| chunk.to_vec()).collect();
+
+    let seed_range: Vec<u64> = seed_pairs
+        .iter()
+        .flat_map(|sp| (sp[0]..sp[0] + sp[1]).collect::<Vec<u64>>())
+        .collect();
+
+    return calculate_lowest_location(&seed_range, &maps);
+}
+
+fn calculate_lowest_location(seeds: &Vec<u64>, maps: &Vec<CategoryMap>) -> u64 {
     let mut result = u64::MAX;
 
-    seeds.values.iter().for_each(|seed| {
+    seeds.iter().for_each(|seed| {
         let mut final_seed = *seed;
 
-        maps.iter().for_each(|m| final_seed = propagate_seed(final_seed, &m));
+        maps.iter()
+            .for_each(|m| final_seed = propagate_seed(final_seed, &m));
 
         result = result.min(final_seed);
     });
@@ -111,12 +149,12 @@ fn calculate_lowest_location(seeds: &Seeds, maps: &Vec<CategoryMap>) -> u64 {
 }
 
 fn propagate_seed(seed: u64, cat_map: &CategoryMap) -> u64 {
-  for line in &cat_map.lines {
-    if seed >= line.src && seed < line.src + line.range {
-      return line.dst + (seed - line.src);
+    for line in &cat_map.lines {
+        if seed >= line.src && seed < (line.src + line.range) {
+            return line.dst + (seed - line.src);
+        }
     }
-  }
-  return seed;
+    return seed;
 }
 
 #[cfg(test)]
@@ -139,6 +177,22 @@ mod tests {
             std::fs::read_to_string("assets/example.txt").expect("This file should exist");
 
         assert_eq!(lowest_location(&mini_almanac), 35);
+    }
+
+    #[test]
+    fn should_return_lowest_location_part_02() {
+        let mini_almanac =
+            std::fs::read_to_string("assets/input.txt").expect("This file should exist");
+
+        assert_eq!(lowest_location_part_2(&mini_almanac), 79004094);
+    }
+
+    #[test]
+    fn should_return_lowest_location_example_part_02() {
+        let mini_almanac =
+            std::fs::read_to_string("assets/example.txt").expect("This file should exist");
+
+        assert_eq!(lowest_location_part_2(&mini_almanac), 46);
     }
 
     #[test]
