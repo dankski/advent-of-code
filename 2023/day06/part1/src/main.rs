@@ -3,8 +3,10 @@ mod competition;
 
 use utils::parse_races;
 
-fn main() {
-    let races = parse_races(&"../assets/races_example.txt");
+use crate::utils::error_margin;
 
-    println!("Hello, world!");
+fn main() {
+    let races = parse_races(&"../assets/races.txt");
+
+    println!("[SOLUTION]: {}", error_margin(&races));
 }
