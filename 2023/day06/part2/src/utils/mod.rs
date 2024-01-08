@@ -1,28 +1,5 @@
 use crate::competition::Race;
 
-// pub fn parse_races(file: &str) -> Vec<Race> {
-//     let fs = std::fs::read_to_string(file).expect("Expect this files exists.");
-//     let lines: Vec<&str> = fs.split("\n").collect();
-//     let re = Regex::new(r"\d+").unwrap();
-//     let times: Vec<u32> = re
-//         .find_iter(lines[0])
-//         .map(|m| m.as_str().parse::<u32>().unwrap())
-//         .collect();
-//     let distandces: Vec<u32> = re
-//         .find_iter(lines[1])
-//         .map(|m| m.as_str().parse::<u32>().unwrap())
-//         .collect();
-
-//     return times
-//         .iter()
-//         .zip(distandces.iter())
-//         .map(|(t, d)| Race {
-//             start: *t,
-//             duration: *d,
-//         })
-//         .collect();
-// }
-
 pub fn parse_race(file: &str) -> Vec<Race> {
     let fs = std::fs::read_to_string(file).expect("Expect this files exists.");
     let lines: Vec<&str> = fs.trim().split("\n").collect();
@@ -41,22 +18,22 @@ pub fn parse_race(file: &str) -> Vec<Race> {
         .collect::<Vec<String>>();
 
     vec![Race {
-        start: numbers[0].parse::<u32>().unwrap(),
-        duration: numbers[1].parse::<u32>().unwrap(),
+        start: numbers[0].parse::<u64>().unwrap(),
+        duration: numbers[1].parse::<u64>().unwrap(),
     }]
 }
 
-pub fn error_margin(races: &Vec<Race>) -> u32 {
-    let wins: Vec<u32> = races
+pub fn error_margin(races: &Vec<Race>) -> u64 {
+    let wins: Vec<u64> = races
         .iter()
-        .map(|race| calculate_ways_to_win(&race).len() as u32)
-        .collect::<Vec<u32>>();
+        .map(|race| calculate_ways_to_win(&race).len() as u64)
+        .collect::<Vec<u64>>();
 
     return wins.iter().fold(1, |acc, &x| acc * x);
 }
 
-pub fn calculate_ways_to_win(race: &Race) -> Vec<u32> {
-    let mut wins: Vec<u32> = Vec::new();
+pub fn calculate_ways_to_win(race: &Race) -> Vec<u64> {
+    let mut wins: Vec<u64> = Vec::new();
 
     for hold in 1..race.start {
         let diff = race.start - hold;
