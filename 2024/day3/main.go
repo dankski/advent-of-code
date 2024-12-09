@@ -6,42 +6,18 @@ import (
 	"os"
 	"regexp"
 	"strconv"
-	"strings"
 )
 
 var expressionParser = regexp.MustCompile(`mul\(\d+,\d+\)`)
 var valueParser = regexp.MustCompile(`mul\((\d+),(\d+)\)`)
-var dontAndDoParser = regexp.MustCompile(`don't\(\)(.*?)do\(\)`)
+var dontAndDoParser = regexp.MustCompile(`mul\((\d+),(\d+)\)|don't\(\)|do\(\)`)
 
 func main() {
-	// var matches []string
-	// program_1 := "mul(2,3)"
-	// program_2 := "mul ( 2 , 4 )"
-	// program_3 := "xmul(2,4)%&mul[3,7]!@^do_not_mul(5,5)+mul(32,64]then(mul(11,8)mul(8,5))"
 
-	// matches := parseProgramMemory(program_1)
-	// fmt.Printf("PRG: %s, Match: %v\n", program_1, matches)
-	// fmt.Printf("Match: %s, Sum: %d\n", matches, evaluateProgram(matches))
+	day1(readInput("input.txt"))
 
-	// matches = parseProgramMemory(program_2)
-	// fmt.Printf("PRG: %s, Match: %v\n", program_2, matches)
-	// fmt.Printf("Match: %s, Sum: %d\n", matches, evaluateProgram(matches))
+	day2(readInput("input.txt"))
 
-	// matches = parseProgramMemory(program_3)
-	// fmt.Printf("PRG: %s, Match: %v\n", program_3, matches)
-	// fmt.Printf("Match: %s, Sum: %d\n", matches, evaluateProgram(matches))
-
-	// day1(readInput("input.txt"))
-
-	// program := "xmul(2,4)&mul[3,7]!^don't()_mul(5,5)+mul(32,64](mul(11,8)undo()?mul(8,5))"
-	// filter_matches := parseProgramMemory(program, dontAndDoParser)
-
-	// filtered_program := strings.Replace(program, filter_matches[0], "", 1)
-	// fitered_program_matches := parseProgramMemory(filtered_program, expressionParser)
-	// fmt.Printf("Match: %s, Sum: %d\n", fitered_program_matches, evaluateProgram(fitered_program_matches))
-
-	// day2(readInput("input.txt"))
-	day2("ixmul(2,4)&mul[3,7]!^don't()_mul(5,5)+mul(32,64](mul(11,8)undo()?mul(8,5))")
 }
 
 func day1(program string) {
@@ -51,35 +27,23 @@ func day1(program string) {
 }
 
 func day2(program string) {
-	dontMarker := "don't()"
-	doMarker := "do()"
-
-	var toRemove []string
-	var stack []int
-
-	for reader := 0; reader < len(program); {
-
-		beginIndex := strings.Index(program[reader:], dontMarker)
-		if beginIndex != -1 {
-			stack = append(stack, beginIndex+len(dontMarker))
-			reader = beginIndex + len(dontMarker)
-			continue
+	matches := parseProgramMemory(program, dontAndDoParser)
+	enabled := true
+	var mulExpressions []string
+	for _, m := range matches {
+		if expressionParser.MatchString(m) {
+			if enabled {
+				mulExpressions = append(mulExpressions, m)
+			}
+		} else if "don't()" == m {
+			enabled = false
+		} else if "do()" == m {
+			enabled = true
 		}
-
-		endIndex := strings.Index(program[reader:], doMarker)
-		if endIndex != -1 {
-			startIndex := stack[len(stack)-1]
-			stack = stack[:len(stack)-1] // pop
-			toRemove = append(toRemove, program[startIndex:endIndex])
-			reader = endIndex + len(doMarker)
-			continue
-		}
-
-		reader += 1
-
 	}
 
-	fmt.Println("%v", toRemove)
+	fmt.Printf("PRG: %s, Match: %v\n", program, mulExpressions)
+	fmt.Printf("Match: %V, \n\nSum: %d\n", mulExpressions, evaluateProgram(mulExpressions))
 }
 
 func parseProgramMemory(p string, parser *regexp.Regexp) []string {
