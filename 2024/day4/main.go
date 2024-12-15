@@ -7,80 +7,56 @@ import (
 	"strings"
 )
 
-type Direction struct {
-	DX, DY int
+var directions = [][2]int{
+	{0, 1},   // Horizontal right
+	{0, -1},  // Horizontal left
+	{1, 0},   // Vertical down
+	{-1, 0},  // Vertical up
+	{1, 1},   // Diagonal top-left to bottom-right
+	{-1, -1}, // Diagonal bottom-right to top-left
+	{1, -1},  // Diagonal top-right to bottom-left
+	{-1, 1},  // Diagonal bottom-left to top-right
 }
 
-var directions = []Direction{
-	{DX: 0, DY: 1},   // horizontal right
-	{DX: 0, DY: -1},  // horizonatal left
-	{DX: 1, DY: 0},   // vertial down
-	{DX: -1, DY: 0},  // vertical up
-	{DX: 1, DY: 1},   // diag top-left to bottom-right
-	{DX: -1, DY: -1}, // diag bottom-right to top-left
-	{DX: 1, DY: -1},  // diag top-right to bottom-left
-	{DX: -1, DY: 1},  // diag bottom-left to top-rightt
+// Function to check if the position is within bounds
+func isInBounds(x, y, rows, cols int) bool {
+	return x >= 0 && x < rows && y >= 0 && y < cols
 }
 
-type Grid [][]rune
-
-type Match struct {
-	X, Y, DX, DY int
-}
-
-func Day1(word string, input string) {
-	grid := mapToGrid(input)
+// Function to search in a specific direction
+func search(grid [][]rune, word string, x, y, dx, dy int) bool {
 	rows, cols := len(grid), len(grid[0])
-	reverseWord := reverseString(word)
-
-	positions := []Match{}
-
-	for x := 0; x < rows; x++ {
-		for y := 0; y < cols; y++ {
-			for _, dir := range directions {
-				dx, dy := dir.DX, dir.DY
-				if searchFrom(word, grid, x, y, dx, dy, rows, cols) || searchFrom(reverseWord, grid, x, y, dir.DX, dir.DY, rows, cols) {
-					positions = append(positions, Match{X: x, Y: y, DX: dir.DX, DY: dir.DY})
-				}
-			}
-		}
-	}
-
-	if 0 < len(positions) {
-		totalCountsWithoutDuplicates := len(positions) / 2
-		// fmt.Printf("Word '%s' total: %d, found at: %v\n", word, totalCountsWithoutDuplicates, positions) // Dived by two because we len(positions) counts also duplicates
-		fmt.Printf("Word '%s' total: %d\n", word, totalCountsWithoutDuplicates) // Dived by two because we len(positions) counts also duplicates
-	} else {
-		fmt.Printf("Word '%s' not found.\n", word)
-	}
-}
-
-func mapToGrid(input string) Grid {
-	lines := strings.Split(input, "\n")
-
-	grid := Grid{}
-
-	for _, line := range lines {
-		grid = append(grid, []rune(line))
-	}
-	return grid
-}
-
-func notInBound(x, y, rows, cols int) bool {
-	return (0 <= x) && (x < rows) && (0 <= y) && (y < cols)
-}
-
-func searchFrom(word string, grid Grid, x, y, dx, dy, rows, cols int) bool {
-
 	for i := 0; i < len(word); i++ {
 		nx, ny := x+i*dx, y+i*dy
-		if !notInBound(nx, ny, rows, cols) || grid[nx][ny] != rune(word[i]) {
+		if !isInBounds(nx, ny, rows, cols) || grid[nx][ny] != rune(word[i]) {
 			return false
 		}
 	}
 	return true
 }
 
+// Main function to find all occurrences of a word and its reverse
+func findWord(grid [][]rune, word string) [][2]int {
+	reverseWord := reverseString(word)
+	rows, cols := len(grid), len(grid[0])
+	var occurrences [][2]int
+
+	for x := 0; x < rows; x++ {
+		for y := 0; y < cols; y++ {
+			// Check all directions from this starting point
+			for _, dir := range directions {
+				dx, dy := dir[0], dir[1]
+				if search(grid, word, x, y, dx, dy) || search(grid, reverseWord, x, y, dx, dy) {
+					occurrences = append(occurrences, [2]int{x, y})
+				}
+			}
+		}
+	}
+
+	return occurrences
+}
+
+// Helper function to reverse a string
 func reverseString(s string) string {
 	runes := []rune(s)
 	for i, j := 0, len(runes)-1; i < j; i, j = i+1, j-1 {
@@ -100,18 +76,37 @@ func readInput(filename string) string {
 }
 
 func main() {
-	input := `MMMSXXMASM
-	MSAMXMSMSA
-	AMXSXMAAMM
-	MSAMASMSMX
-	XMASAMXAMM
-	XXAMMXXAMA
-	SMSMSASXSS
-	SAXAMASAAA
-	MAMMMXMMMM
-	MXMXAXMASX`
+	// Input grid as a string
+	// 	input := `MMMSXXMASM
+	// MSAMXMSMSA
+	// AMXSXMAAMM
+	// MSAMASMSMX
+	// XMASAMXAMM
+	// XXAMMXXAMA
+	// SMSMSASXSS
+	// SAXAMASAAA
+	// MAMMMXMMMM
+	// MXMXAXMASX`
 
-	// input := strings.TrimSpace(readInput("input.txt"))
+	input := strings.TrimSpace(readInput("input.txt"))
 
-	Day1("XMAS", input)
+	// Convert input to 2D rune slice
+	lines := strings.Split(input, "\n")
+	grid := make([][]rune, len(lines))
+	for i, line := range lines {
+		grid[i] = []rune(line)
+	}
+
+	// Word to find
+	word := "XMAS"
+
+	// Find occurrences
+	occurrences := findWord(grid, word)
+
+	// Print occurrences
+	fmt.Println("Occurrences of XMAS (or SAMX):")
+	fmt.Printf("Total: %d\n", len(occurrences)/2)
+	// for _, occ := range occurrences {
+	// 	fmt.Printf("Start at row %d, col %d\n", occ[0]+1, occ[1]+1)
+	// }
 }
