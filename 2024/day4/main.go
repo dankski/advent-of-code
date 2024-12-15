@@ -75,6 +75,18 @@ func readInput(filename string) string {
 	return string(input)
 }
 
+func Day1(grid [][]rune, word string) {
+	// Find occurrences
+	occurrences := findWord(grid, word)
+
+	// Print occurrences
+	fmt.Println("Occurrences of XMAS (or SAMX):")
+	fmt.Printf("Total: %d\n", len(occurrences)/2)
+	// for _, occ := range occurrences {
+	// 	fmt.Printf("Start at row %d, col %d\n", occ[0]+1, occ[1]+1)
+	// }
+}
+
 func main() {
 	// Input grid as a string
 	// 	input := `MMMSXXMASM
@@ -98,15 +110,6 @@ func main() {
 	}
 
 	// Word to find
-	word := "XMAS"
+	Day1(grid, "XMAS")
 
-	// Find occurrences
-	occurrences := findWord(grid, word)
-
-	// Print occurrences
-	fmt.Println("Occurrences of XMAS (or SAMX):")
-	fmt.Printf("Total: %d\n", len(occurrences)/2)
-	// for _, occ := range occurrences {
-	// 	fmt.Printf("Start at row %d, col %d\n", occ[0]+1, occ[1]+1)
-	// }
-}
+}S
